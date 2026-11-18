@@ -3,6 +3,7 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    localStorage.removeItem('bistroos-theme');
     await TestBed.configureTestingModule({
       imports: [App],
     })
@@ -19,6 +20,188 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, LiveOrderSistem');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Gestión del menú');
+  });
+
+  it('should toggle and persist the color theme', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.app-shell')?.getAttribute('data-theme')).toBe('light');
+
+    host.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('.app-shell')?.getAttribute('data-theme')).toBe('dark');
+    expect(localStorage.getItem('bistroos-theme')).toBe('dark');
+    expect(host.querySelector('.theme-toggle')?.getAttribute('aria-label')).toBe(
+      'Activar modo claro',
+    );
+
+    fixture.destroy();
+    const restoredFixture = TestBed.createComponent(App);
+    await restoredFixture.whenStable();
+    restoredFixture.detectChanges();
+
+    expect(
+      (restoredFixture.nativeElement as HTMLElement)
+        .querySelector('.app-shell')
+        ?.getAttribute('data-theme'),
+    ).toBe('dark');
+  });
+
+  it('should filter menu items by category', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const categoryTab = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.category-tab'),
+    ).find((button) => button.textContent?.trim() === 'Pizzas');
+
+    categoryTab?.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.product-card').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('.product-card h3')?.textContent).toContain(
+      'Pizza margarita',
+    );
+  });
+
+  it('should toggle an item availability switch', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const availabilitySwitch = host.querySelector<HTMLButtonElement>('[role="switch"]');
+    expect(availabilitySwitch?.getAttribute('aria-checked')).toBe('true');
+
+    availabilitySwitch?.click();
+    fixture.detectChanges();
+
+    expect(availabilitySwitch?.getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('should open the add item dialog', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('.page-heading .primary-button')?.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#modal-title')?.textContent).toContain(
+      'Agregar platillo nuevo',
+    );
+  });
+
+  it('should open checkout from Orders and calculate the selected tip', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Pedidos"]')?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('h1')?.textContent).toContain('Pago y liquidación');
+    expect(host.textContent).toContain('$56.33');
+
+    const tenPercent = Array.from(host.querySelectorAll<HTMLButtonElement>('.tip-option')).find(
+      (button) => button.textContent?.trim() === '10%',
+    );
+    tenPercent?.click();
+    fixture.detectChanges();
+
+    expect(host.textContent).toContain('$54.18');
+  });
+
+  it('should complete a payment entered with the keypad', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Pedidos"]')?.click();
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('[aria-label="2"]')?.click();
+    fixture.detectChanges();
+
+    const payButton = Array.from(host.querySelectorAll<HTMLButtonElement>('.pay-button')).find(
+      (button) => button.textContent?.includes('$2.00'),
+    );
+    payButton?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('[role="status"]')?.textContent).toContain('Pago realizado');
+  });
+
+  it('should show all three live kitchen columns from Dashboard', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Cocina"]')?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('h1')?.textContent).toContain('Pantalla de cocina');
+    expect(host.querySelectorAll('.kds-column').length).toBe(3);
+    expect(
+      Array.from(host.querySelectorAll('.column-counter')).map((counter) =>
+        counter.textContent?.trim(),
+      ),
+    ).toEqual(['3', '4', '2']);
+    expect(host.querySelectorAll('.kds-ticket').length).toBe(9);
+    expect(host.querySelector('.modifier-exclusion')?.textContent).toContain('Sin cebolla');
+  });
+
+  it('should move kitchen tickets through pending, preparing, ready, and bumped', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Cocina"]')?.click();
+    fixture.detectChanges();
+
+    host.querySelector<HTMLButtonElement>('[aria-label="Iniciar preparación pedido #204"]')?.click();
+    fixture.detectChanges();
+    expect(host.querySelectorAll('.pending-column .kds-ticket').length).toBe(2);
+    expect(host.querySelectorAll('.preparing-column .kds-ticket').length).toBe(5);
+
+    host.querySelector<HTMLButtonElement>('[aria-label="Marcar como listo pedido #204"]')?.click();
+    fixture.detectChanges();
+    expect(host.querySelectorAll('.preparing-column .kds-ticket').length).toBe(4);
+    expect(host.querySelectorAll('.ready-column .kds-ticket').length).toBe(3);
+
+    host.querySelector<HTMLButtonElement>('[aria-label="Despachar pedido #204"]')?.click();
+    fixture.detectChanges();
+    expect(host.querySelectorAll('.ready-column .kds-ticket').length).toBe(2);
+    expect(host.querySelector('.kds-board-summary')?.textContent).toContain('8');
+  });
+
+  it('should filter the kitchen board to delayed tickets', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Cocina"]')?.click();
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('[aria-label="Filtrar pedidos de cocina"]')?.click();
+    fixture.detectChanges();
+    Array.from(host.querySelectorAll<HTMLButtonElement>('.kds-filter-menu button'))
+      .find((button) => button.textContent?.trim() === 'Solo atrasados')
+      ?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('.kds-ticket').length).toBe(2);
+    expect(host.querySelectorAll('.delay-alert').length).toBe(2);
   });
 });
