@@ -3,6 +3,8 @@ import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { interval, map, startWith } from 'rxjs';
+import { LoginComponent } from './login/login.component';
+import { PaymentHistoryComponent } from './payment-history/payment-history.component';
 
 type MenuCategory = 'Hamburguesas' | 'Pizzas' | 'Acompañamientos' | 'Bebidas' | 'Postres';
 type AppTheme = 'light' | 'dark';
@@ -52,12 +54,12 @@ interface KitchenOrder {
 }
 
 @Component({
-  imports: [AsyncPipe, FormsModule],
+  imports: [AsyncPipe, FormsModule, LoginComponent, PaymentHistoryComponent],
   selector: 'app-root',
   templateUrl: './app.html',
 })
 export class App {
-  protected activeScreen: 'menu' | 'checkout' | 'kds' = 'menu';
+  protected activeScreen: 'menu' | 'checkout' | 'kds' | 'payments' | 'login' = 'menu';
   protected theme: AppTheme =
     localStorage.getItem('bistroos-theme') === 'dark' ? 'dark' : 'light';
   protected readonly clockDisplay$ = interval(1000).pipe(
@@ -87,6 +89,8 @@ export class App {
     { label: 'Menú', icon: 'menu' },
     { label: 'Clientes', icon: 'customers' },
     { label: 'Analítica', icon: 'analytics' },
+    { label: 'Pagos', icon: 'orders' },
+    { label: 'Login', icon: 'customers' },
   ];
 
   protected readonly kitchenColumns: {
@@ -456,6 +460,12 @@ export class App {
     } else if (label === 'Menú') {
       this.activeScreen = 'menu';
       this.pageTitle.setTitle('Gestión del menú | BistroOS');
+    } else if (label === 'Pagos') {
+      this.activeScreen = 'payments';
+      this.pageTitle.setTitle('Historial de pagos | BistroOS');
+    } else if (label === 'Login') {
+      this.activeScreen = 'login';
+      this.pageTitle.setTitle('Inicio de sesión | BistroOS');
     }
   }
 

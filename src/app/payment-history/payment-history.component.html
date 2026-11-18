@@ -1,0 +1,94 @@
+<div class="layout">
+  <!-- Contenido -->
+  <div class="main">
+    <section class="content">
+      <h1 class="page-title">Financial Reporting - Payment History</h1>
+
+      <!-- Filtros e indicadores -->
+      <div class="toolbar">
+        <div class="filters">
+          <div class="filter">
+            <label>Date range</label>
+            <div class="control">Oct 1 - Oct 29, 2026</div>
+          </div>
+          <div class="filter">
+            <label>Payment status</label>
+            <div class="control">All ▾</div>
+          </div>
+          <div class="filter filter--search">
+            <label>Search</label>
+            <div class="control control--muted">Search</div>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <span class="kpi__label">Total Revenue</span>
+            <strong class="kpi__value">$14,245.50</strong>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Transactions</span>
+            <strong class="kpi__value">384</strong>
+          </div>
+          <div class="kpi kpi--refund">
+            <span class="kpi__label">Refunds</span>
+            <strong class="kpi__value">$120.00</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card">
+        <h3 class="card__title">Payment History</h3>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-check"><input type="checkbox" aria-label="Seleccionar todo" /></th>
+                <th>Transaction ID</th>
+                <th>Date &amp; Time</th>
+                <th>Cashier Name</th>
+                <th>Mesa / Table</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of payments">
+                <td class="col-check"><input type="checkbox" [attr.aria-label]="'Seleccionar ' + p.id" /></td>
+                <td>{{ p.id }}</td>
+                <td>{{ p.date }}</td>
+                <td>{{ p.cashier }}</td>
+                <td>{{ p.table }}</td>
+                <td>{{ p.amount }}</td>
+                <td>
+                  <span class="method" [ngClass]="p.method === 'Card' ? 'method--card' : 'method--cash'">
+                    {{ p.method }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status" [ngClass]="p.status === 'Completed' ? 'status--ok' : 'status--refund'">
+                    {{ p.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="table-footer">
+          <span>Showing 1-10 of 384 results</span>
+          <div class="pager">
+            <button type="button" disabled>‹</button>
+            <button type="button" class="pager__current">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">›</button>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </div>
+</div>
