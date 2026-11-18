@@ -17,8 +17,8 @@
       @for (item of navigation; track item.label) {
         <button
           class="nav-link"
-          [class.active]="item.label === (activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú')"
-          [attr.aria-current]="item.label === (activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú') ? 'page' : null"
+          [class.active]="item.label === (isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mesas' : activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú')"
+          [attr.aria-current]="item.label === (isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mesas' : activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú') ? 'page' : null"
           [attr.aria-label]="item.label"
           [title]="item.label"
           type="button"
@@ -34,6 +34,15 @@
               }
               @case ('orders') {
                 <path d="M7 4h10M7 8h10M7 12h6M5 3h14a1 1 0 0 1 1 1v16l-3-2-3 2-3-2-3 2-3-2-2 2V4a1 1 0 0 1 1-1Z" />
+              }
+              @case ('tables') {
+                <path d="M4 5h16v6H4zM7 11v8m10-8v8M4 19h16" />
+                <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
+                <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+                <circle cx="17" cy="8" r="1" fill="currentColor" stroke="none" />
+              }
+              @case ('staff') {
+                <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 8v6m-3-3h6" />
               }
               @case ('menu') {
                 <path d="M4 6h16M4 12h16M4 18h16" />
@@ -152,7 +161,7 @@
         <div class="breadcrumbs">
           <span>Espacio de trabajo</span>
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
-          <strong>{{ activeScreen === 'checkout' ? 'Pago y liquidación' : 'Gestión del menú' }}</strong>
+          <strong>{{ isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mapa de mesas' : activeScreen === 'checkout' ? 'Pago y liquidación' : 'Gestión del menú' }}</strong>
         </div>
         <div class="topbar-actions">
           <button class="icon-button notification-button" type="button" aria-label="Notificaciones">
@@ -181,7 +190,10 @@
       }
     </header>
 
-    <section class="page-content">
+    <section class="page-content" [hidden]="!isMesasRoute && !isPersonalRoute">
+      <router-outlet />
+    </section>
+    <section class="page-content" [hidden]="isMesasRoute">
       @if (activeScreen === 'checkout') {
         <div class="checkout-page">
           <div class="checkout-heading">

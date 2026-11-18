@@ -3675,3 +3675,105 @@ app-root {
     height: 31px;
   }
 }
+
+.mesas-screen .client-field {
+  position: relative;
+}
+
+.mesas-screen .client-field > label {
+  color: #737c8c;
+  font-size: 9px;
+}
+
+.mesas-screen .client-suggestions {
+  position: absolute;
+  z-index: 4;
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid #e5e8ee;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 7px 18px #202a3b16;
+}
+
+.mesas-screen .client-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid #f0f1f4;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.mesas-screen .client-option:hover {
+  background: #fff8f5;
+}
+
+.mesas-screen .client-option-avatar {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #e16f50;
+  border-radius: 50%;
+  background: #fff1ec;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.mesas-screen .client-option > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.mesas-screen .client-option strong {
+  color: #354054;
+  font-size: 9px;
+}
+
+.mesas-screen .client-option small,
+.mesas-screen .client-empty {
+  color: #828a98;
+  font-size: 9px;
+}
+
+.mesas-screen .client-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+}
+
+.mesas-screen .no-waiters {
+  margin: 0;
+  color: #788191;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.mesas-screen .no-waiters a {
+  color: #e16f50;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.mesas-screen .no-waiters a:hover {
+  text-decoration: underline;
+}
+
+.mesas-screen .assign-button:disabled {
+  color: #a5aab3;
+  border-color: #eceef2;
+  background: #f8f9fa;
+  cursor: not-allowed;
+}

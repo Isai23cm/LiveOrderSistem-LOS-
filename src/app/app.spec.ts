@@ -1,11 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
 import { App } from './app';
+import { ClientesService } from './clientes/clientes.service';
+import { MesasService } from './mesas/mesas.service';
 
 describe('App', () => {
   beforeEach(async () => {
     localStorage.removeItem('bistroos-theme');
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideRouter(routes)],
     })
       .compileComponents();
   });
@@ -21,6 +26,79 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Gestión del menú');
+  });
+
+  it('should navigate to the restaurant table map', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Mesas"]')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.querySelector('.mesas-screen h1')?.textContent).toContain('Mapa de mesas');
+    expect(host.querySelectorAll('.table-pin').length).toBe(28);
+    expect(host.textContent).toContain('14/28');
+  });
+
+  it('should navigate to the staff management screen', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Personal"]')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.querySelector('.personal-screen h1')?.textContent).toContain('Personal');
+    expect(host.querySelectorAll('.staff-table tbody tr').length).toBe(5);
+  });
+
+  it('should create a client and save its id on a table reservation', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Mesas"]')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('.heading-actions .primary-button')?.click();
+    fixture.detectChanges();
+
+    const nombre = host.querySelector<HTMLInputElement>('#cliente-reservacion');
+    expect(nombre).toBeTruthy();
+    if (!nombre) {
+      return;
+    }
+
+    nombre.value = 'Cliente de prueba';
+    nombre.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    const telefono = host.querySelector<HTMLInputElement>('.field-row input[type="tel"]');
+    expect(telefono).toBeTruthy();
+    if (!telefono) {
+      return;
+    }
+
+    telefono.value = '55 9876 5432';
+    telefono.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    host.querySelector<HTMLButtonElement>('.client-empty .text-button')?.click();
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('.save-reservation')?.click();
+    fixture.detectChanges();
+
+    const cliente = TestBed.inject(ClientesService).obtenerPorTelefono('55 9876 5432')();
+    const reservacion = TestBed.inject(MesasService).obtenerReservacion('mesa-16')();
+    expect(cliente?.nombre).toBe('Cliente de prueba');
+    expect(reservacion?.clienteId).toBe(cliente?.id);
+    expect(reservacion?.telefono).toBe('55 9876 5432');
   });
 
   it('should toggle and persist the color theme', async () => {

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
+import { Router, RouterOutlet } from '@angular/router';
 import { interval, map, startWith } from 'rxjs';
 
 type MenuCategory = 'Hamburguesas' | 'Pizzas' | 'Acompañamientos' | 'Bebidas' | 'Postres';
@@ -52,7 +53,7 @@ interface KitchenOrder {
 }
 
 @Component({
-  imports: [AsyncPipe, FormsModule],
+  imports: [AsyncPipe, FormsModule, RouterOutlet],
   selector: 'app-root',
   templateUrl: './app.html',
 })
@@ -84,6 +85,8 @@ export class App {
   protected readonly navigation = [
     { label: 'Cocina', icon: 'dashboard' },
     { label: 'Pedidos', icon: 'orders' },
+    { label: 'Mesas', icon: 'tables' },
+    { label: 'Personal', icon: 'staff' },
     { label: 'Menú', icon: 'menu' },
     { label: 'Clientes', icon: 'customers' },
     { label: 'Analítica', icon: 'analytics' },
@@ -375,7 +378,18 @@ export class App {
     );
   }
 
-  constructor(private readonly pageTitle: Title) {}
+  constructor(
+    private readonly pageTitle: Title,
+    private readonly router: Router,
+  ) {}
+
+  protected get isMesasRoute(): boolean {
+    return this.router.url === '/mesas';
+  }
+
+  protected get isPersonalRoute(): boolean {
+    return this.router.url === '/personal';
+  }
 
   protected get filteredItems(): MenuItem[] {
     const query = this.searchQuery.trim().toLowerCase();
@@ -447,7 +461,13 @@ export class App {
   }
 
   protected selectNavigation(label: string): void {
-    if (label === 'Cocina') {
+    if (label === 'Personal') {
+      this.pageTitle.setTitle('Personal | BistroOS');
+      void this.router.navigateByUrl('/personal');
+    } else if (label === 'Mesas') {
+      this.pageTitle.setTitle('Mapa de mesas | BistroOS');
+      void this.router.navigateByUrl('/mesas');
+    } else if (label === 'Cocina') {
       this.activeScreen = 'kds';
       this.pageTitle.setTitle('Cocina | BistroOS');
     } else if (label === 'Pedidos') {
@@ -456,6 +476,10 @@ export class App {
     } else if (label === 'Menú') {
       this.activeScreen = 'menu';
       this.pageTitle.setTitle('Gestión del menú | BistroOS');
+    }
+
+    if (label !== 'Mesas' && label !== 'Personal' && (this.isMesasRoute || this.isPersonalRoute)) {
+      void this.router.navigateByUrl('/');
     }
   }
 
