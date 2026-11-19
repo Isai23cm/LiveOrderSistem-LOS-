@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet } from '@angular/router';
 import { interval, map, startWith } from 'rxjs';
+import { AuthService } from './login/auth.service';
+import { PaymentsService } from './payment-history/payments.service';
 
 type MenuCategory = 'Hamburguesas' | 'Pizzas' | 'Acompañamientos' | 'Bebidas' | 'Postres';
 type AppTheme = 'light' | 'dark';
@@ -85,6 +87,7 @@ export class App {
   protected readonly navigation = [
     { label: 'Cocina', icon: 'dashboard' },
     { label: 'Pedidos', icon: 'orders' },
+    { label: 'Historial de pagos', icon: 'history' },
     { label: 'Mesas', icon: 'tables' },
     { label: 'Personal', icon: 'staff' },
     { label: 'Menú', icon: 'menu' },
@@ -381,6 +384,8 @@ export class App {
   constructor(
     private readonly pageTitle: Title,
     private readonly router: Router,
+    private readonly auth: AuthService,
+    private readonly payments: PaymentsService,
   ) {}
 
   protected get isMesasRoute(): boolean {
@@ -389,6 +394,27 @@ export class App {
 
   protected get isPersonalRoute(): boolean {
     return this.router.url === '/personal';
+  }
+
+  protected get isPaymentHistoryRoute(): boolean {
+    return this.router.url === '/payment-history';
+  }
+
+  protected get isLoginRoute(): boolean {
+    return this.router.url === '/login';
+  }
+
+  protected get currentUserName(): string {
+    return this.auth.currentUser?.name ?? 'Administrador';
+  }
+
+  protected get currentUserInitials(): string {
+    return this.currentUserName
+      .split(/\s+/)
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   }
 
   protected get filteredItems(): MenuItem[] {
@@ -461,7 +487,10 @@ export class App {
   }
 
   protected selectNavigation(label: string): void {
-    if (label === 'Personal') {
+    if (label === 'Historial de pagos') {
+      this.pageTitle.setTitle('Historial de pagos | BistroOS');
+      void this.router.navigateByUrl('/payment-history');
+    } else if (label === 'Personal') {
       this.pageTitle.setTitle('Personal | BistroOS');
       void this.router.navigateByUrl('/personal');
     } else if (label === 'Mesas') {
@@ -478,9 +507,19 @@ export class App {
       this.pageTitle.setTitle('Gestión del menú | BistroOS');
     }
 
-    if (label !== 'Mesas' && label !== 'Personal' && (this.isMesasRoute || this.isPersonalRoute)) {
+    if (
+      label !== 'Mesas' &&
+      label !== 'Personal' &&
+      label !== 'Historial de pagos' &&
+      (this.isMesasRoute || this.isPersonalRoute || this.isPaymentHistoryRoute)
+    ) {
       void this.router.navigateByUrl('/');
     }
+  }
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigateByUrl('/login');
   }
 
   protected toggleTheme(): void {
@@ -570,9 +609,16 @@ export class App {
   }
 
   protected processPayment(): void {
-    if (this.amountValue > 0) {
-      this.paymentComplete = true;
+    if (!Number.isFinite(this.amountValue) || this.amountValue <= 0) {
+      return;
     }
+
+    this.payments.register(
+      this.amountValue,
+      this.selectedPaymentMethodLabel,
+      this.currentUserName,
+    );
+    this.paymentComplete = true;
   }
 
   protected useTotalDue(): void {

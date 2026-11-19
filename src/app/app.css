@@ -354,10 +354,69 @@ app-root {
   box-shadow: 0 0 0 3px #e6f6ef;
 }
 
+.topbar-logout {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  color: #b94f35;
+  border: 1px solid #f1d8d1;
+  border-radius: 8px;
+  background: #fff7f4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.topbar-logout:hover {
+  border-color: #e8ad9e;
+  background: #ffede7;
+}
+
+.topbar-logout svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .page-content {
   width: min(100%, 1500px);
   margin: 0 auto;
   padding: 37px 42px 19px;
+}
+
+.app-shell.login-active {
+  display: block;
+  min-height: 100vh;
+  background: #eef1f3;
+}
+
+.app-shell.login-active .sidebar,
+.app-shell.login-active .topbar,
+.app-shell.login-active .main-content > .page-content:not([hidden]) + .page-content {
+  display: none;
+}
+
+.app-shell.login-active .main-content {
+  min-height: 100vh;
+  margin: 0;
+}
+
+.app-shell.login-active .main-content > .page-content {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.app-shell.login-active .main-content > .page-content[hidden] {
+  display: none;
 }
 
 .page-heading {
@@ -1299,6 +1358,16 @@ app-root {
   }
 
   .topbar-divider {
+    display: none;
+  }
+
+  .topbar-logout {
+    width: 34px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .topbar-logout span {
     display: none;
   }
 
@@ -3155,6 +3224,17 @@ app-root {
 .app-shell[data-theme="dark"] .location-indicator,
 .app-shell[data-theme="dark"] .theme-toggle {
   color: #d5dee8;
+}
+
+.app-shell[data-theme="dark"] .topbar-logout {
+  color: #ffad96;
+  border-color: #68453f;
+  background: #352a2a;
+}
+
+.app-shell[data-theme="dark"] .topbar-logout:hover {
+  border-color: #986456;
+  background: #493230;
 }
 
 .app-shell[data-theme="dark"] .breadcrumbs svg,

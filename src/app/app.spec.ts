@@ -8,6 +8,11 @@ import { MesasService } from './mesas/mesas.service';
 describe('App', () => {
   beforeEach(async () => {
     localStorage.removeItem('bistroos-theme');
+    localStorage.removeItem('bistroos-payments');
+    localStorage.setItem(
+      'bistroos-session',
+      JSON.stringify({ email: 'admin@bistroos.com', name: 'Administrador' }),
+    );
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter(routes)],
@@ -26,6 +31,20 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Gestión del menú');
+  });
+
+  it('should log out and return to the login screen', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('.topbar-logout')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(localStorage.getItem('bistroos-session')).toBeNull();
+    expect(host.querySelector('app-login')).toBeTruthy();
   });
 
   it('should navigate to the restaurant table map', async () => {
@@ -216,7 +235,35 @@ describe('App', () => {
     payButton?.click();
     fixture.detectChanges();
 
-    expect(host.querySelector('[role="status"]')?.textContent).toContain('Pago realizado');
+    expect(host.querySelector('[role="status"]')?.textContent).toContain('Pago registrado');
+    expect(JSON.parse(localStorage.getItem('bistroos-payments') ?? '[]')).toHaveLength(8);
+  });
+
+  it('should open the payment history and filter transactions by status', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector<HTMLButtonElement>('[aria-label="Historial de pagos"]')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.querySelector('#payment-history-title')?.textContent).toContain('Historial de pagos');
+    expect(host.querySelectorAll('tbody tr').length).toBe(5);
+
+    const statusFilter = host.querySelector<HTMLSelectElement>('#payment-status');
+    expect(statusFilter).toBeTruthy();
+    if (!statusFilter) {
+      return;
+    }
+
+    statusFilter.value = 'refunded';
+    statusFilter.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('tbody tr').length).toBe(1);
+    expect(host.querySelector('tbody')?.textContent).toContain('Reembolsado');
   });
 
   it('should show all three live kitchen columns from Dashboard', async () => {
