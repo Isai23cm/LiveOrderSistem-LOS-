@@ -12,6 +12,13 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Login and payments
+
+The login is a local demonstration flow. Use `admin@bistroos.com` with password `bistro123`.
+Payments are simulated and saved in the browser's local storage; no card is charged. Connect a
+real authentication service and payment provider before using the application with real accounts
+or transactions.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
@@ -35,6 +42,15 @@ ng build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## Deploying to Vercel
+
+Import this repository into Vercel. The root `vercel.json` configures the production build
+(`npm run build`), publishes `dist/LiveOrderSistem/browser`, and routes application paths back to
+Angular so pages such as `/mesas` continue to work when opened directly or refreshed.
+
+The current demo does not require environment variables. Keep any future secrets in Vercel's
+Environment Variables settings rather than committing a local `.env` file.
 
 ## Running unit tests
 

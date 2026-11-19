@@ -39,6 +39,11 @@ testem.log
 /typings
 __screenshots__/
 
+# Local environment variables; configure production values in Vercel.
+/.env
+/.env.*
+!/.env.example
+
 # System files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,106 @@
+<div class="personal-screen">
+  <header class="personal-heading">
+    <div>
+      <span class="personal-eyebrow">EQUIPO DEL RESTAURANTE</span>
+      <h1>Personal</h1>
+      <p>Administra a tus meseros y quién puede asignarse a una mesa.</p>
+    </div>
+    <span class="personal-count"
+      ><strong>{{ meserosActivos() }}</strong> meseros activos</span
+    >
+  </header>
+
+  <section class="personal-card" aria-labelledby="team-title">
+    <div class="personal-card-heading">
+      <div>
+        <h2 id="team-title">Meseros</h2>
+        <p>El equipo activo aparecerá en el mapa de mesas.</p>
+      </div>
+      <span class="team-total">{{ meseros().length }} en total</span>
+    </div>
+
+    <form class="staff-form" [formGroup]="formulario" (ngSubmit)="guardar()">
+      <div class="staff-form-title">
+        <h3>{{ editandoId() ? 'Editar mesero' : 'Agregar mesero' }}</h3>
+        @if (editandoId()) {
+          <button class="staff-cancel" type="button" (click)="cancelarEdicion()">Cancelar</button>
+        }
+      </div>
+      <div class="staff-form-fields">
+        <label class="staff-field">
+          <span>Nombre</span>
+          <input formControlName="nombre" placeholder="Nombre del mesero" />
+          @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+            <small>Escribe el nombre del mesero.</small>
+          }
+        </label>
+        <label class="staff-field">
+          <span>URL del avatar <em>Opcional</em></span>
+          <input formControlName="avatarUrl" type="url" placeholder="https://..." />
+        </label>
+        <button class="staff-submit" type="submit">
+          {{ editandoId() ? 'Guardar cambios' : 'Agregar mesero' }}
+        </button>
+      </div>
+    </form>
+
+    @if (mensaje()) {
+      <p class="staff-message" role="status">{{ mensaje() }}</p>
+    }
+
+    <div class="staff-table-wrap">
+      <table class="staff-table">
+        <thead>
+          <tr>
+            <th>MESERO</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (mesero of meseros(); track mesero.id) {
+            <tr>
+              <td>
+                <div class="staff-person">
+                  @if (mesero.avatarUrl) {
+                    <img [src]="mesero.avatarUrl" [alt]="'Avatar de ' + mesero.nombre" />
+                  } @else {
+                    <span class="staff-avatar" aria-hidden="true">{{
+                      iniciales(mesero.nombre)
+                    }}</span>
+                  }
+                  <span
+                    ><strong>{{ mesero.nombre }}</strong
+                    ><small>Mesero</small></span
+                  >
+                </div>
+              </td>
+              <td>
+                <span class="staff-status" [class.inactive]="!mesero.activo">
+                  <i></i>{{ mesero.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="staff-actions">
+                  <button type="button" (click)="editar(mesero)">Editar</button>
+                  <button
+                    class="deactivate-action"
+                    type="button"
+                    [disabled]="!mesero.activo"
+                    (click)="desactivar(mesero)"
+                  >
+                    Desactivar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="staff-empty" colspan="3">Aún no hay meseros en el equipo.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

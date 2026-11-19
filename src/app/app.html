@@ -1,4 +1,9 @@
-<div class="app-shell" [class.kds-active]="activeScreen === 'kds'" [attr.data-theme]="theme">
+<div
+  class="app-shell"
+  [class.kds-active]="activeScreen === 'kds'"
+  [class.login-active]="isLoginRoute"
+  [attr.data-theme]="theme"
+>
   <aside class="sidebar">
     <a class="brand" href="#" aria-label="Inicio de BistroOS">
       <span class="brand-mark" aria-hidden="true">
@@ -17,8 +22,8 @@
       @for (item of navigation; track item.label) {
         <button
           class="nav-link"
-          [class.active]="item.label === (activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú')"
-          [attr.aria-current]="item.label === (activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú') ? 'page' : null"
+          [class.active]="item.label === (isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mesas' : isPaymentHistoryRoute ? 'Historial de pagos' : activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú')"
+          [attr.aria-current]="item.label === (isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mesas' : isPaymentHistoryRoute ? 'Historial de pagos' : activeScreen === 'kds' ? 'Cocina' : activeScreen === 'checkout' ? 'Pedidos' : 'Menú') ? 'page' : null"
           [attr.aria-label]="item.label"
           [title]="item.label"
           type="button"
@@ -34,6 +39,19 @@
               }
               @case ('orders') {
                 <path d="M7 4h10M7 8h10M7 12h6M5 3h14a1 1 0 0 1 1 1v16l-3-2-3 2-3-2-3 2-3-2-2 2V4a1 1 0 0 1 1-1Z" />
+              }
+              @case ('history') {
+                <circle cx="12" cy="12" r="8.5" />
+                <path d="M12 7v5l3 2M4 5v4h4" />
+              }
+              @case ('tables') {
+                <path d="M4 5h16v6H4zM7 11v8m10-8v8M4 19h16" />
+                <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
+                <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+                <circle cx="17" cy="8" r="1" fill="currentColor" stroke="none" />
+              }
+              @case ('staff') {
+                <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 8v6m-3-3h6" />
               }
               @case ('menu') {
                 <path d="M4 6h16M4 12h16M4 18h16" />
@@ -72,11 +90,11 @@
         <span>Visita nuestro centro de ayuda</span>
         <a href="mailto:support@bistroos.example">Contactar soporte <span aria-hidden="true">↗</span></a>
       </div>
-      <button class="profile-button" type="button" aria-label="Cuenta de Alex Morgan">
-        <span class="avatar">AM</span>
+      <button class="profile-button" type="button" aria-label="Cerrar sesión" (click)="logout()">
+        <span class="avatar">{{ currentUserInitials }}</span>
         <span class="profile-copy">
-          <strong>Alex Morgan</strong>
-          <small>Propietario del restaurante</small>
+          <strong>{{ currentUserName }}</strong>
+          <small>Cerrar sesión</small>
         </span>
         <svg class="profile-more" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="5" cy="12" r="1" />
@@ -147,12 +165,19 @@
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.6 8.6 0 1 0 20.5 14.2Z" /></svg>
             }
           </button>
+          <button class="topbar-logout" type="button" aria-label="Cerrar sesión" (click)="logout()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
+              <path d="M14 16l4-4-4-4m4 4H9" />
+            </svg>
+            <span>Cerrar sesión</span>
+          </button>
         </div>
       } @else {
         <div class="breadcrumbs">
           <span>Espacio de trabajo</span>
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
-          <strong>{{ activeScreen === 'checkout' ? 'Pago y liquidación' : 'Gestión del menú' }}</strong>
+          <strong>{{ isPersonalRoute ? 'Personal' : isMesasRoute ? 'Mapa de mesas' : isPaymentHistoryRoute ? 'Historial de pagos' : activeScreen === 'checkout' ? 'Pago y liquidación' : 'Gestión del menú' }}</strong>
         </div>
         <div class="topbar-actions">
           <button class="icon-button notification-button" type="button" aria-label="Notificaciones">
@@ -177,18 +202,28 @@
           </button>
           <span class="topbar-divider"></span>
           <span class="location-indicator"><span></span> Sucursal Centro</span>
+          <button class="topbar-logout" type="button" aria-label="Cerrar sesión" (click)="logout()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
+              <path d="M14 16l4-4-4-4m4 4H9" />
+            </svg>
+            <span>Cerrar sesión</span>
+          </button>
         </div>
       }
     </header>
 
-    <section class="page-content">
+    <section class="page-content" [hidden]="!isMesasRoute && !isPersonalRoute && !isPaymentHistoryRoute && !isLoginRoute">
+      <router-outlet />
+    </section>
+    <section class="page-content" [hidden]="isMesasRoute || isPersonalRoute || isPaymentHistoryRoute || isLoginRoute">
       @if (activeScreen === 'checkout') {
         <div class="checkout-page">
           <div class="checkout-heading">
             <div>
               <div class="eyebrow"><span class="eyebrow-dot"></span> COBRO DEL PEDIDO</div>
               <h1>Pago y liquidación</h1>
-              <p>Revisa el pedido y completa el pago de forma segura.</p>
+              <p>Revisa el pedido y registra un pago de demostración.</p>
             </div>
             <div class="order-reference">
               <span class="order-reference-icon">
@@ -289,11 +324,11 @@
                       <path d="M8 7h8m-8 4h2m4 0h2m-8 4h2m4 0h2" />
                     </svg>
                   </span>
-                  <div><h2 id="payment-terminal-title">Terminal de pago</h2><p>Selecciona un método de pago</p></div>
+                  <div><h2 id="payment-terminal-title">Simulador de pago</h2><p>Selecciona un método de pago</p></div>
                 </div>
                 <span class="secure-indicator">
                   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
-                  Seguro
+                  MODO DEMO
                 </span>
               </div>
 
@@ -371,7 +406,7 @@
               @if (paymentComplete) {
                 <div class="payment-success" role="status">
                   <span>✓</span>
-                  <div><strong>Pago realizado</strong><small>{{ formatCurrency(amountValue) }} cobrado con {{ selectedPaymentMethodLabel }}</small></div>
+                  <div><strong>Pago registrado (simulación)</strong><small>{{ formatCurrency(amountValue) }} con {{ selectedPaymentMethodLabel }}</small></div>
                 </div>
               }
 
@@ -381,7 +416,7 @@
                 [disabled]="amountValue <= 0 || paymentComplete"
                 (click)="processPayment()"
               >
-                <span>{{ paymentComplete ? 'Pago completado' : 'Cobrar ' + formatCurrency(amountValue) }}</span>
+                <span>{{ paymentComplete ? 'Pago registrado' : 'Registrar pago ' + formatCurrency(amountValue) }}</span>
                 @if (!paymentComplete) {
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
                 } @else {
@@ -391,7 +426,7 @@
 
               <div class="terminal-footer">
                 <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
-                Tu pago está cifrado y protegido
+                Modo de demostración: no se realizan cargos reales.
               </div>
             </section>
           </div>

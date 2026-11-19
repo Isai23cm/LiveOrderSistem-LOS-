@@ -1,4 +1,5 @@
 @import "./app/app.css";
+@import "./app/mesas/mesas.css";
 
 * {
   box-sizing: border-box;

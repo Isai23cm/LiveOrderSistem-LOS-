@@ -1,0 +1,130 @@
+<section class="content" aria-labelledby="payment-history-title">
+  <h1 class="page-title" id="payment-history-title">Historial de pagos</h1>
+
+  <div class="toolbar">
+    <div class="filters">
+      <div class="filter">
+        <label for="payment-start-date">Desde</label>
+        <input
+          id="payment-start-date"
+          class="control"
+          type="date"
+          [(ngModel)]="startDate"
+          (ngModelChange)="onFiltersChanged()"
+        />
+      </div>
+      <div class="filter">
+        <label for="payment-end-date">Hasta</label>
+        <input
+          id="payment-end-date"
+          class="control"
+          type="date"
+          [(ngModel)]="endDate"
+          (ngModelChange)="onFiltersChanged()"
+        />
+      </div>
+      <div class="filter">
+        <label for="payment-status">Estado</label>
+        <select
+          id="payment-status"
+          class="control"
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="onFiltersChanged()"
+        >
+          <option value="all">Todos</option>
+          <option value="completed">Completados</option>
+          <option value="refunded">Reembolsados</option>
+        </select>
+      </div>
+      <div class="filter filter--search">
+        <label for="payment-search">Buscar</label>
+        <input
+          id="payment-search"
+          class="control"
+          type="search"
+          placeholder="Folio, cajero, mesa o método"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onFiltersChanged()"
+        />
+      </div>
+    </div>
+
+    <div class="kpis" aria-label="Resumen de pagos">
+      <div class="kpi">
+        <span class="kpi__label">Ingresos cobrados</span>
+        <strong class="kpi__value">{{ formatCurrency(completedRevenue) }}</strong>
+      </div>
+      <div class="kpi">
+        <span class="kpi__label">Transacciones</span>
+        <strong class="kpi__value">{{ payments.length }}</strong>
+      </div>
+      <div class="kpi kpi--refund">
+        <span class="kpi__label">Reembolsos</span>
+        <strong class="kpi__value">{{ formatCurrency(refundTotal) }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card__title">Transacciones registradas</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Fecha y hora</th>
+            <th>Cajero</th>
+            <th>Mesa / Servicio</th>
+            <th>Importe</th>
+            <th>Método de pago</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of visiblePayments">
+            <td>#{{ p.id }}</td>
+            <td>{{ p.date | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ p.cashier }}</td>
+            <td>{{ p.table }}</td>
+            <td>{{ formatCurrency(p.amount) }}</td>
+            <td>
+              <span class="method" [ngClass]="p.method === 'Efectivo' ? 'method--cash' : 'method--card'">
+                {{ p.method }}
+              </span>
+            </td>
+            <td>
+              <span class="status" [ngClass]="p.status === 'completed' ? 'status--ok' : 'status--refund'">
+                {{ p.status === 'completed' ? 'Completado' : 'Reembolsado' }}
+              </span>
+            </td>
+          </tr>
+          @if (filteredPayments.length === 0) {
+            <tr>
+              <td class="empty-state" colspan="7">No hay pagos que coincidan con los filtros.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="table-footer">
+      <span>
+        {{ filteredPayments.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}–{{
+          visibleRangeEnd
+        }}
+        de {{ filteredPayments.length }} resultados
+      </span>
+      <nav class="pager" aria-label="Paginación del historial de pagos">
+        <button type="button" aria-label="Página anterior" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
+        <button
+          *ngFor="let page of pages"
+          type="button"
+          [class.pager__current]="currentPage === page"
+          [attr.aria-current]="currentPage === page ? 'page' : null"
+          (click)="goToPage(page)"
+        >{{ page }}</button>
+        <button type="button" aria-label="Página siguiente" [disabled]="currentPage === pageCount" (click)="goToPage(currentPage + 1)">›</button>
+      </nav>
+    </footer>
+  </div>
+</section>

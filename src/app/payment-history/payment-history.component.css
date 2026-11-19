@@ -1,0 +1,317 @@
+:host {
+  display: block;
+}
+
+.layout {
+  display: flex;
+  background: #f1f3f6;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #2a2f35;
+}
+
+/* ---------- Barra lateral ---------- */
+.sidebar {
+  width: 210px;
+  flex: none;
+  background: #141a21;
+  color: #cfd5db;
+  padding: 18px 12px;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.sidebar__logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #c2522b, #e8863a);
+}
+
+.nav-group {
+  margin: 14px 8px 4px;
+  font-size: 0.68rem;
+  color: #7d8691;
+}
+
+.nav-item {
+  display: block;
+  padding: 9px 10px;
+  margin-bottom: 2px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  color: #cfd5db;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: #1e2630;
+}
+
+.nav-item--sub {
+  margin-left: 14px;
+}
+
+.nav-item--active {
+  background: #26303c;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Contenido ---------- */
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e3e7ec;
+}
+
+.topbar__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #c2522b;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.content {
+  padding: 22px 24px 32px;
+}
+
+.page-title {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* ---------- Filtros e indicadores ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.7rem;
+  color: #6b727a;
+}
+
+.control {
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 1px solid #d7dce1;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 0.8rem;
+}
+
+.control--muted {
+  color: #9aa0a6;
+}
+
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kpi {
+  min-width: 130px;
+  padding: 10px 14px;
+  border: 1px solid #e3e7ec;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.kpi__label {
+  display: block;
+  font-size: 0.7rem;
+  color: #6b727a;
+}
+
+.kpi__value {
+  font-size: 1.05rem;
+}
+
+.kpi--refund .kpi__value {
+  color: #c0392b;
+}
+
+/* ---------- Tabla ---------- */
+.card {
+  background: #fff;
+  border: 1px solid #e3e7ec;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card__title {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+thead th {
+  padding: 10px 14px;
+  background: #f6f8fa;
+  border-top: 1px solid #e3e7ec;
+  border-bottom: 1px solid #e3e7ec;
+  text-align: left;
+  font-weight: 600;
+  color: #4b535b;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #eef0f3;
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: #fafbfc;
+}
+
+.col-check {
+  width: 36px;
+  text-align: center;
+}
+
+.method {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.method::before {
+  content: '';
+  width: 16px;
+  height: 11px;
+  border-radius: 2px;
+}
+
+.method--card::before {
+  background: #2f7bd8;
+}
+
+.method--cash::before {
+  background: #2f9e6b;
+}
+
+.status {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.status--ok {
+  background: #dcf3e6;
+  color: #1f7a4c;
+}
+
+.status--refund {
+  background: #fbdede;
+  color: #b3362b;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  color: #6b727a;
+}
+
+.pager {
+  display: flex;
+  gap: 4px;
+}
+
+.pager button {
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid #d7dce1;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pager__current {
+  border-color: #c2522b;
+  color: #c2522b;
+  font-weight: 700;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}

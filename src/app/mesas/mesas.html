@@ -1,0 +1,320 @@
+<div class="mesas-screen">
+  <header class="mesas-heading">
+    <div>
+      <span class="eyebrow">SALÓN Y RESERVACIONES</span>
+      <h1>Mapa de mesas</h1>
+      <p>Consulta la distribución del restaurante y administra el servicio.</p>
+    </div>
+    <div class="heading-actions">
+      <div class="header-stat">
+        <span class="stat-dot"></span>
+        <span
+          ><small>Mesas activas</small
+          ><strong>{{ mesasActivas() }}/{{ mesas().length }}</strong></span
+        >
+      </div>
+      <div class="header-stat">
+        <span class="stat-dot occupied-dot"></span>
+        <span
+          ><small>Ocupadas</small><strong>{{ mesasOcupadas() }}</strong></span
+        >
+      </div>
+      <button class="primary-button" type="button" (click)="nuevaReservacion()">
+        <span aria-hidden="true">+</span> Nueva reservación
+      </button>
+    </div>
+  </header>
+
+  <div class="mesas-layout">
+    <section class="panel map-panel" aria-labelledby="map-title">
+      <div class="panel-heading">
+        <div>
+          <h2 id="map-title">Plano del restaurante</h2>
+          <p>Selecciona una mesa para administrar su servicio.</p>
+        </div>
+        <span class="live-label"><span></span> En vivo</span>
+      </div>
+
+      <div class="map-toolbar">
+        <div class="zone-filters" role="group" aria-label="Filtrar mesas por zona">
+          @for (opcion of opcionesZona; track opcion.id) {
+            <button
+              type="button"
+              [class.selected]="filtroZona() === opcion.id"
+              [attr.aria-pressed]="filtroZona() === opcion.id"
+              (click)="seleccionarZona(opcion.id)"
+            >
+              {{ opcion.etiqueta }}
+            </button>
+          }
+        </div>
+        <div class="legend" aria-label="Estados de mesa">
+          <span><i class="available-key"></i>Disponible</span>
+          <span><i class="occupied-key"></i>Ocupada</span>
+          <span><i class="reserved-key"></i>Reservada</span>
+        </div>
+      </div>
+
+      <div class="map-viewport">
+        <div class="restaurant-map">
+          <div class="zone-label salon-label">SALÓN PRINCIPAL</div>
+          <div class="zone-label terrace-label">TERRAZA</div>
+          <div class="zone-label bar-label">BARRA</div>
+          <div class="reference kitchen">COCINA <span>↗</span></div>
+          <div class="reference restrooms"><span>WC</span> BAÑOS</div>
+          <div class="reference entrance">ENTRADA <span>↓</span></div>
+          <div class="bar-counter"><span>BAR</span></div>
+          @for (taburete of [0, 1, 2, 3, 4, 5, 6, 7]; track taburete) {
+            <span class="stool" [style.left.%]="20 + taburete * 8"></span>
+          }
+          <div class="plant plant-one"></div>
+          <div class="plant plant-two"></div>
+
+          @for (mesa of mesasFiltradas(); track mesa.id) {
+            <button
+              [class.selected]="mesaSeleccionada()?.id === mesa.id"
+              [class]="
+                'table-pin ' +
+                (mesa.forma === 'redonda' ? 'round-table ' : 'square-table ') +
+                'table-' +
+                mesa.estado
+              "
+              [style.left.%]="mesa.x"
+              [style.top.%]="mesa.y"
+              [attr.aria-label]="'Mesa ' + mesa.numero + ', ' + textoEstado(mesa.estado)"
+              [attr.aria-pressed]="mesaSeleccionada()?.id === mesa.id"
+              type="button"
+              (click)="seleccionarMesa(mesa)"
+            >
+              <strong>{{ mesa.numero.toString().padStart(2, '0') }}</strong>
+              <span>{{ mesa.capacidad }} pax</span>
+              @if (mesa.estado === 'ocupada') {
+                <small>{{ mesa.minutosOcupada }} min</small>
+              } @else if (mesa.estado === 'reservada') {
+                <small>{{ horaVisible(mesa.horaReservacion) }}</small>
+              }
+            </button>
+          }
+        </div>
+      </div>
+      <div class="map-footer">
+        <span
+          ><strong>{{ mesasFiltradas().length }}</strong> mesas en esta vista</span
+        >
+        <span>Actualizado ahora</span>
+      </div>
+    </section>
+
+    <aside class="panel detail-panel" aria-labelledby="detail-title">
+      @if (mesaSeleccionada(); as mesa) {
+        <div class="detail-heading">
+          <div>
+            <span class="detail-kicker">DETALLE DE MESA</span>
+            <h2 id="detail-title">Mesa {{ mesa.numero.toString().padStart(2, '0') }}</h2>
+          </div>
+          <span class="status-pill" [class]="'status-pill status-' + mesa.estado">
+            {{ textoEstado(mesa.estado) }}
+          </span>
+        </div>
+        <div class="table-summary">
+          <span>{{ nombreZona(mesa.zona) }}</span>
+          <span>{{ mesa.capacidad }} personas</span>
+          @if (mesa.estado === 'ocupada') {
+            <span>{{ mesa.minutosOcupada ?? 0 }} min ocupada</span>
+          }
+        </div>
+
+        <form
+          class="detail-section reservation-form"
+          [formGroup]="reservacionForm"
+          (ngSubmit)="guardarReservacion()"
+        >
+          <div class="section-title">
+            <span class="section-icon">✦</span>
+            <h3>Reservación</h3>
+          </div>
+          <div class="field client-field">
+            <label for="cliente-reservacion">Cliente</label>
+            <input formControlName="clienteId" type="hidden" />
+            <input
+              id="cliente-reservacion"
+              formControlName="cliente"
+              placeholder="Buscar por nombre o teléfono"
+              autocomplete="off"
+              role="combobox"
+              aria-autocomplete="list"
+              [attr.aria-expanded]="mostrarListaClientes()"
+              (focus)="mostrarListaClientes.set(true)"
+              (input)="actualizarConsultaCliente($event)"
+            />
+            @if (mostrarListaClientes()) {
+              <div class="client-suggestions" role="listbox" aria-label="Clientes encontrados">
+                @if (clientesCoincidentes().length) {
+                  @for (cliente of clientesCoincidentes(); track cliente.id) {
+                    <button
+                      class="client-option"
+                      type="button"
+                      role="option"
+                      (click)="seleccionarCliente(cliente)"
+                    >
+                      <span class="client-option-avatar">{{ iniciales(cliente.nombre) }}</span>
+                      <span
+                        ><strong>{{ cliente.nombre }}</strong
+                        ><small>{{ cliente.telefono }}</small></span
+                      >
+                    </button>
+                  }
+                } @else if (consultaCliente().trim()) {
+                  <div class="client-empty">
+                    <span>No hay coincidencias.</span>
+                    <button class="text-button" type="button" (click)="crearClienteNuevo()">
+                      + Crear cliente nuevo
+                    </button>
+                  </div>
+                } @else {
+                  <span class="client-empty">Busca por nombre o teléfono.</span>
+                }
+              </div>
+            }
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span>Teléfono</span>
+              <input
+                formControlName="telefono"
+                type="tel"
+                placeholder="55 0000 0000"
+                (input)="editarTelefonoCliente()"
+              />
+            </label>
+            <label class="field">
+              <span>Personas</span>
+              <input formControlName="personas" type="number" min="1" />
+            </label>
+          </div>
+          <label class="field">
+            <span>Fecha y hora</span>
+            <input formControlName="fechaHora" type="datetime-local" />
+          </label>
+          <label class="field">
+            <span>Notas</span>
+            <textarea
+              formControlName="notas"
+              rows="2"
+              placeholder="Preferencias o solicitudes especiales"
+            ></textarea>
+          </label>
+          @if (
+            reservacionForm.controls.cliente.touched && reservacionForm.controls.clienteId.invalid
+          ) {
+            <small class="validation-message"
+              >Selecciona un cliente de la lista o crea uno nuevo.</small
+            >
+          }
+          @if (
+            reservacionForm.controls.telefono.touched && reservacionForm.controls.telefono.invalid
+          ) {
+            <small class="validation-message"
+              >El teléfono es necesario para crear un cliente.</small
+            >
+          }
+          <button class="secondary-button save-reservation" type="submit">
+            Guardar reservación
+          </button>
+        </form>
+
+        <section class="detail-section">
+          <div class="section-title">
+            <span class="section-icon waiter-icon">♙</span>
+            <h3>Mesero</h3>
+          </div>
+          @if (meseros().length) {
+            <div class="waiter-row">
+              <select
+                aria-label="Seleccionar mesero"
+                [value]="meseroIdSeleccionado()"
+                (change)="seleccionarMesero($event)"
+              >
+                <option value="">Sin asignar</option>
+                @for (mesero of meseros(); track mesero.id) {
+                  <option [value]="mesero.id">{{ mesero.nombre }}</option>
+                }
+              </select>
+              <button
+                class="secondary-button assign-button"
+                type="button"
+                [disabled]="!meseroIdSeleccionado()"
+                (click)="asignarMesero()"
+              >
+                Asignar
+              </button>
+            </div>
+          } @else {
+            <p class="no-waiters">
+              No hay meseros. Agrégalos en <a routerLink="/personal">Personal</a>.
+            </p>
+          }
+          @if (meseroAsignadoInactivo(mesa)) {
+            <p class="no-waiters">
+              El mesero asignado ya no está activo. Asigna otro desde la lista.
+            </p>
+          }
+        </section>
+
+        <section class="detail-section order-section">
+          <div class="section-title">
+            <span class="section-icon order-icon">▤</span>
+            <h3>Pedido activo</h3>
+          </div>
+          @if (pedidoSeleccionado(); as pedido) {
+            <div class="order-card">
+              <div class="order-top">
+                <strong>{{ pedido.folio }}</strong
+                ><span>{{ pedido.estado }}</span>
+              </div>
+              <p>{{ pedido.articulos.join(' · ') }}</p>
+              <div class="order-total">
+                <span>Total</span
+                ><strong>{{
+                  pedido.total | currency: 'MXN' : 'symbol-narrow' : '1.2-2' : 'es-MX'
+                }}</strong>
+              </div>
+            </div>
+          } @else if (mesa.pedidoId) {
+            <div class="order-card">
+              <strong>{{ pedidoPara(mesa)?.folio }}</strong>
+              <p>Pedido vinculado a esta mesa.</p>
+              <button class="text-button" type="button" (click)="abrirPedido()">Ver pedido</button>
+            </div>
+          } @else {
+            <div class="no-order">
+              <span>No hay un pedido vinculado.</span>
+              <button class="text-button" type="button" (click)="abrirPedido()">
+                Vincular pedido
+              </button>
+            </div>
+          }
+        </section>
+
+        @if (mensajeGuardado()) {
+          <p class="success-message" role="status">{{ mensajeGuardado() }}</p>
+        }
+        <div class="table-actions">
+          <button class="secondary-button" type="button" (click)="cambiarEstado()">
+            Cambiar estado a {{ estadoSiguiente(mesa.estado) }}
+          </button>
+          <button class="release-button" type="button" (click)="liberarMesa()">Liberar mesa</button>
+        </div>
+      } @else {
+        <div class="detail-empty">
+          <span class="empty-table-icon">⌑</span>
+          <h2 id="detail-title">Detalle de mesa</h2>
+          <p>Selecciona una mesa para ver su detalle.</p>
+          @if (mensajeGuardado()) {
+            <p class="validation-message" role="status">{{ mensajeGuardado() }}</p>
+          }
+        </div>
+      }
+    </aside>
+  </div>
+</div>
